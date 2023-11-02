@@ -9,24 +9,25 @@ const getPostData = (req, res) => {
       resolve({});
       return;
     }
-    if(req.headers['content-type'] !== 'apllication/json') {
+    if(req.headers['content-type'] !== 'application/json') {
       resolve({});
       return;
     }
 
     let postData = '';
 
-    res.on('data', chunk => {
+    req.on('data', chunk => {
       postData += chunk.toString();
     });
 
-    res.on('end', () => {
+    req.on('end', () => {
+      
       if(!postData) {
         resolve({});
         return;
       }
       resolve(
-        JSON.stringify(postData)
+        JSON.parse(postData)
       )
     })
   })
@@ -40,11 +41,11 @@ const serverHandle = (req, res) => {
 
   res.setHeader("Content-Type", "application/json");
 
-  const blogData = handleBlogRouter(req, res);
-  const userData = handleUserRouter(req, res);
-  
-  getPostData(req).then((postData) => {
+  getPostData(req).then(async (postData) => {
     req.body = postData;
+
+    const blogData = await handleBlogRouter(req, res);
+    const userData = await handleUserRouter(req, res);
 
     // 处理博客路由
     if (blogData) {

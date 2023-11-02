@@ -1,50 +1,57 @@
+const { exec } = require('../db/mysql');
+
 // 获取博客列表
 const getList = (author, keyword) => {
-  return [
-    {
-      id: '123',
-      title: '手撕 diff 算法',
-      content: 'rrwerwenrmwentwerrte',
-      createTime: '',
-      author: 'jjy'
-    },
-    {
-      id: '12333',
-      title: '搭建基于 nodejs 的博客系统',
-      content: 'rrwerwenrmwentwerrte',
-      createTime: '',
-      author: 'jjy'
-    }
-  ]
+  let sql = `select * from blogs where 1=1 `
+
+  if(author) {
+    sql += `and author = '${author}' `;
+  } 
+
+  if(keyword) {
+    sql += `and title like '%${keyword}%' `
+  }
+
+  sql += `order by createTime desc;`;
+
+  // 返回 promise
+  return exec(sql);
 }
 
 // 获取博客详情
-const getDetail = (id) => {
-  return {
-    id: '123',
-    title: '手撕 diff 算法',
-    content: 'rrwerwenrmwentwerrte',
-    createTime: '',
-    author: 'jjy'
-  }
+const getDetail = async (id) => {
+  let sql = `select * from blogs where id='${id}';`;
+  const result = await exec(sql);
+  return result[0];
 }
 
 // 新建博客
-const createBlog = (blogData = {})=> {
+const createBlog = async (blogData = {})=> {
+  const { title = '', content = '', author = '' } = blogData;
+  const createTime = Date.now();
+
+  const sql = `insert into blogs (title, content, createTime, author) values ('${title}', '${content}', ${createTime}, '${author}');`
+  const insertData = await exec(sql);
+
   return {
-    id: 12345, // 新建ID，表示插入数据表里的ID
+    id: insertData.insertId,
   }
 }
 
 // 更新博客
-const updateBlog = (id, blogData = {}) => {
-  console.log('update', id, blogData)
-  return true;
+const updateBlog = async (id, blogData = {}) => {
+  const { title = '', content = '' } = blogData;
+  const sql = `update blogs set title = '${title}', content = '${content}' where id=${id}`;
+
+  const updateData = await exec(sql);
+  return !!(updateData.affectedRows > 0);
 }
 
 // 删除博客
-const deleteBlog = (id) => {
-  return true;
+const deleteBlog = async (id, author) => {
+  const sql = `delete from blogs where id=${id} and author='${author}';`;
+  const delData = await exec(sql);
+  return !!(delData.affectedRows > 0);
 }
  
 module.exports = {

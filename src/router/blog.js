@@ -1,7 +1,7 @@
 const { getList, getDetail, createBlog, updateBlog, deleteBlog } = require('../controller/blog');
 const { SuccessModel, ErrorModel } = require('../model/resModel');
 
-const handleBlogRouter = (req, res) => {
+const handleBlogRouter = async (req, res) => {
   const method = req.method;
   const path = req.path;
   const id = req.query.id;
@@ -9,20 +9,21 @@ const handleBlogRouter = (req, res) => {
   // 博客列表
   if(method === 'GET' && path === '/api/blog/list') {
     const { author = '', keyword = '' } = req.query;
-    const listData = getList(author, keyword);
+    const listData = await getList(author, keyword);
 
     return new SuccessModel(listData);
   }
 
   // 博客详情
   if(method === 'GET' && path === '/api/blog/detail') {
-    const detailData = getDetail(id);
+    const detailData = await getDetail(id);
+
     return new SuccessModel(detailData);
   }
 
   // 更新博客
   if(method === 'POST' && path === '/api/blog/update') {
-    const updateData = updateBlog(id, req.body);
+    const updateData = await updateBlog(id, req.body);
     if(updateData) {
       return new SuccessModel();
     }
@@ -31,7 +32,8 @@ const handleBlogRouter = (req, res) => {
 
   // 删除博客
   if(method === 'DELETE' && path === '/api/blog/delete') {
-    const data = deleteBlog(id);
+    const author = 'jjy';
+    const data = await deleteBlog(id, author);
     if(data) {
       return new SuccessModel()
     } 
@@ -40,7 +42,11 @@ const handleBlogRouter = (req, res) => {
 
   // 新建博客
   if(method === 'POST' && path === '/api/blog/new') {
-    const data = createBlog(req.body);
+    
+    // mock数据，TODO
+    req.body.author = 'jjy';
+    const data = await createBlog(req.body);
+
     return new SuccessModel(data);
   }
 }
