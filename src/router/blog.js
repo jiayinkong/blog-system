@@ -19,7 +19,21 @@ const handleBlogRouter = async (req, res) => {
   // 博客列表
   if(method === 'GET' && path === '/api/blog/list') {
     const { author = '', keyword = '' } = req.query;
-    const listData = await getList(author, keyword);
+
+    let currentAuthor = author;
+
+    // 如果是用户管理中心，展示的是自己的博客
+    if(req.query.isadmin) {
+      const loginCheckResult = loginCheck(req);
+      if(loginCheckResult) {
+        // 未登录
+        return loginCheckResult;
+      }
+      // 强制查询自己的博客
+      currentAuthor = username;
+    }
+
+    const listData = await getList(currentAuthor, keyword);
 
     return new SuccessModel(listData);
   }
@@ -46,7 +60,7 @@ const handleBlogRouter = async (req, res) => {
   }
 
   // 删除博客
-  if(method === 'DELETE' && path === '/api/blog/delete') {
+  if(method === 'POST' && path === '/api/blog/del') {
     // 登录拦截
     if(loginCheckResult) {
       return loginCheckResult;
