@@ -4,6 +4,7 @@
   "description": "",
   "main": "bin/www.js",
   "scripts": {
+    "debug": "cross-env NODE_ENV=development nodemon --inspect=9229 ./bin/www.js",
     "dev": "cross-env NODE_ENV=development nodemon ./bin/www.js",
     "prod": "cross-env NODE_ENV=production nodemon ./bin/www.js"
   },
@@ -14,6 +15,7 @@
     "nodemon": "^3.0.1"
   },
   "dependencies": {
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "redis": "^4.6.10"
   }
 }

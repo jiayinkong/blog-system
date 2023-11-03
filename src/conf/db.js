@@ -1,6 +1,7 @@
 const env = process.env.NODE_ENV;
 
 let MYSQL_CONF;
+let REDIS_CONF;
 
 // 开发环境的配置
 if(env === 'development') {
@@ -10,6 +11,11 @@ if(env === 'development') {
     password: '123456',
     port: '3306',
     database: 'myblog',
+  }
+
+  REDIS_CONF = {
+    port: 6379,
+    hots: '127.0.1',
   }
 }
 
@@ -22,8 +28,14 @@ if(env === 'production') {
     port: '3306',
     database: 'myblog',
   }
+
+  REDIS_CONF = {
+    port: 6379,
+    hosts: '127.0.1',
+  }
 }
 
 module.exports = {
-  MYSQL_CONF
+  MYSQL_CONF,
+  REDIS_CONF,
 }
