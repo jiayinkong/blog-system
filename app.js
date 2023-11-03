@@ -55,6 +55,14 @@ const serverHandle = async (req, res) => {
   // 设置返回格式
   res.setHeader("Content-Type", "application/json");
 
+  // CORS 跨域
+  // 允许跨域
+  res.setHeader('Access-Control-Allow-Credentials', true); 
+  // 允许跨域的 origin，* 代表所有
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5002');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
   // 获取 path
   const url = req.url;
   const path = url.split("?")[0];
