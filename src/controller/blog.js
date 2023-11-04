@@ -1,11 +1,13 @@
-const { exec } = require('../db/mysql');
+const xss = require('xss');
+const { exec, escape } = require('../db/mysql');
 
 // 获取博客列表
 const getList = (author, keyword) => {
+  
   let sql = `select * from blogs where 1=1 `
 
   if(author) {
-    sql += `and author = '${author}' `;
+    sql += `and author = ${escape(author)} `;
   } 
 
   if(keyword) {
@@ -20,7 +22,7 @@ const getList = (author, keyword) => {
 
 // 获取博客详情
 const getDetail = async (id) => {
-  let sql = `select * from blogs where id='${id}';`;
+  let sql = `select * from blogs where id=${escape(id)};`;
   const result = await exec(sql);
   return result[0];
 }
@@ -30,7 +32,11 @@ const createBlog = async (blogData = {})=> {
   const { title = '', content = '', author = '' } = blogData;
   const createTime = Date.now();
 
-  const sql = `insert into blogs (title, content, createTime, author) values ('${title}', '${content}', ${createTime}, '${author}');`
+  const escapeTitle = escape(xss(title));
+  const escapeContent = escape(xss(content));
+  const escapeAuthor = escape(author);
+
+  const sql = `insert into blogs (title, content, createTime, author) values (${escapeTitle}, ${escapeContent}, ${createTime}, ${escapeAuthor});`
   const insertData = await exec(sql);
 
   return {
@@ -41,7 +47,11 @@ const createBlog = async (blogData = {})=> {
 // 更新博客
 const updateBlog = async (id, blogData = {}) => {
   const { title = '', content = '' } = blogData;
-  const sql = `update blogs set title = '${title}', content = '${content}' where id=${id}`;
+  const escapeId = escape(id);
+  const escapeTitle = escape(xss(title));
+  const escapeContent = escape(xss(content));
+
+  const sql = `update blogs set title = ${escapeTitle}, content = ${escapeContent} where id=${escapeId}`;
 
   const updateData = await exec(sql);
   return !!(updateData.affectedRows > 0);
@@ -49,7 +59,10 @@ const updateBlog = async (id, blogData = {}) => {
 
 // 删除博客
 const deleteBlog = async (id, author) => {
-  const sql = `delete from blogs where id=${id} and author='${author}';`;
+  const escapeId = escape(id);
+  const escapeAuthor = escape(author);
+
+  const sql = `delete from blogs where id=${escapeId} and author=${escapeAuthor};`;
   const delData = await exec(sql);
   return !!(delData.affectedRows > 0);
 }
