@@ -1,71 +1,78 @@
-const querystring = require('querystring');
-const { set, get } = require('./src/db/redis');
-const { access } = require('./src/utils/log');
+const querystring = require("querystring");
+const { set, get } = require("./src/db/redis");
+const { access } = require("./src/utils/log");
 const handleBlogRouter = require("./src/router/blog.js");
 const handleUserRouter = require("./src/router/user.js");
 
 // 设置 cookie 的过期时间
 const setCookieExpires = () => {
   const d = new Date();
-  d.setTime(d.getTime() + (24 * 60 * 60 * 1000));
+  d.setTime(d.getTime() + 24 * 60 * 60 * 1000);
 
   return d.toGMTString();
-}
+};
 
 // 响应头设置 cookie
 const setResponseCookie = (res, userId) => {
   // httpOnly，只允许后端修改 cookie，不允许前端改；设置过期时间
-  res.setHeader('Set-Cookie', `userId=${userId}; path=/; httpOnly; expires=${setCookieExpires()};`);
-}
+  res.setHeader(
+    "Set-Cookie",
+    `userId=${userId}; path=/; httpOnly; expires=${setCookieExpires()};`
+  );
+};
 
 // 用于处理 post data
 const getPostData = (req, res) => {
   return new Promise((resolve) => {
-    if(req.method !== 'POST') {
+    if (req.method !== "POST") {
       resolve({});
       return;
     }
-    if(req.headers['content-type'] !== 'application/json') {
+    if (req.headers["content-type"] !== "application/json") {
       resolve({});
       return;
     }
 
-    let postData = '';
+    let postData = "";
 
-    req.on('data', chunk => {
+    req.on("data", (chunk) => {
       postData += chunk.toString();
     });
 
-    req.on('end', () => {
-      
-      if(!postData) {
+    req.on("end", () => {
+      if (!postData) {
         resolve({});
         return;
       }
-      resolve(
-        JSON.parse(postData)
-      )
-    })
-  })
-}
+      resolve(JSON.parse(postData));
+    });
+  });
+};
 
 // session 数据
 // const SESSION_DATA = {};
 
 const serverHandle = async (req, res) => {
   // 记录 access log
-  access(`${req.method} -- ${req.url} -- ${req.headers['user-agent']} -- ${Date.now()}`)
+  access(
+    `${req.method} -- ${req.url} -- ${
+      req.headers["user-agent"]
+    } -- ${Date.now()}`
+  );
 
   // 设置返回格式
   res.setHeader("Content-Type", "application/json");
 
   // CORS 跨域
   // 允许跨域
-  res.setHeader('Access-Control-Allow-Credentials', true); 
+  res.setHeader("Access-Control-Allow-Credentials", true);
   // 允许跨域的 origin，* 代表所有
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader("Access-Control-Allow-Origin", "*");
   // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5002');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+  );
 
   // 获取 path
   const url = req.url;
@@ -73,15 +80,15 @@ const serverHandle = async (req, res) => {
   req.path = path;
 
   // 解析 query
-  req.query = querystring.parse(url.split('?')[1]);
+  req.query = querystring.parse(url.split("?")[1]);
 
   // 解析 cookie
   req.cookie = {};
-  const cookieStr = req.headers.cookie || ''; // k1=v1;k2=v2;
-  cookieStr.split(';').forEach(item => {
-    if(!item) return;
+  const cookieStr = req.headers.cookie || ""; // k1=v1;k2=v2;
+  cookieStr.split(";").forEach((item) => {
+    if (!item) return;
 
-    const arr = item.split('=');
+    const arr = item.split("=");
     const [key, value] = arr;
 
     req.cookie[key.trim()] = value.trim();
@@ -105,14 +112,14 @@ const serverHandle = async (req, res) => {
   // 解析 session（使用redis）
   let needSetCookie = false;
   let userId = req.cookie.userId;
-  if(!userId) {
+  if (!userId) {
     needSetCookie = true;
     userId = `${Date.now()}_${Math.random()}`;
     await set(userId, JSON.stringify({}));
   }
   req.sessionId = userId;
   let sessionData = await get(req.sessionId);
-  if(sessionData == null) {
+  if (sessionData == null) {
     set(req.sessionId, JSON.stringify({}));
     req.session = {};
   } else {
@@ -127,7 +134,7 @@ const serverHandle = async (req, res) => {
 
   // 处理博客路由
   if (blogData) {
-    if(needSetCookie) {
+    if (needSetCookie) {
       // 把 userId 存到响应头 cookie 返回给客户端
       setResponseCookie(res, userId);
     }
@@ -137,7 +144,7 @@ const serverHandle = async (req, res) => {
 
   // 处理用户路由
   if (userData) {
-    if(needSetCookie) {
+    if (needSetCookie) {
       // 把 userId 存到响应头 cookie 返回给客户端
       setResponseCookie(res, userId);
     }

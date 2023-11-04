@@ -1,12 +1,13 @@
 {
-  "name": "blog",
+  "name": "blog-system",
   "version": "1.0.0",
   "description": "",
-  "main": "bin/www.js",
+  "main": "./native/bin/www.js",
   "scripts": {
-    "debug": "cross-env NODE_ENV=development nodemon --inspect=9229 ./bin/www.js",
-    "dev": "cross-env NODE_ENV=development nodemon ./bin/www.js",
-    "prod": "cross-env NODE_ENV=production nodemon ./bin/www.js"
+    "debug:native": "cross-env NODE_ENV=development nodemon --inspect=9229 ./packages/native/bin/www.js",
+    "dev:native": "cross-env NODE_ENV=development nodemon ./packages/native/bin/www.js",
+    "prod:native": "cross-env NODE_ENV=production nodemon ./packages/native/bin/www.js",
+    "start:express": "node ./packages/express/bin/www"
   },
   "author": "",
   "license": "ISC",
