@@ -15,7 +15,7 @@ if(env === 'development') {
 
   REDIS_CONF = {
     port: 6379,
-    hots: '127.0.1',
+    hosts: '127.0.1',
   }
 }
 

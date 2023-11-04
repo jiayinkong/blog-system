@@ -11,8 +11,14 @@ router.post('/login', async (req, res, next) => {
     if (result) {
       // 用户信息存储在 session 中
       const { username = '', realname = '' } = result;
+
+      console.log(req.session, 'req.session')
+      console.log(typeof req.session, 'typeof req.session')
+
       req.session.username = username;
       req.session.realname = realname;
+
+
 
       res.json(
         new SuccessModel(result)

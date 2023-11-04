@@ -1,8 +1,9 @@
-let createError = require('http-errors');
-let express = require('express');
-let cookieParser = require('cookie-parser');
-let logger = require('morgan');
-let session = require('express-session');
+const createError = require('http-errors');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const session = require('express-session');
+const RedisStore = require('connect-redis').default;
 
 let userRouter = require('./routes/user');
 let blogRouter = require('./routes/blog');
@@ -14,13 +15,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use(session({
-  secret: 'WEWEO#ewrw$9934_rwewTYY',
-  cookie: {
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 
-  }
-}));
+// 处理 session，存到 redis 
+const redisClient = require('./db/redis');
+const sessionStore = new RedisStore({
+  client: redisClient,
+  prefix: "myapp:",
+});
+
+app.use(
+  session({
+    store: sessionStore,
+    resave: false, // required: force lightweight session keep alive (touch)
+    saveUninitialized: false, // recommended: only save session when data exists
+    secret: "keyboard cat",
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000,
+    }
+  })
+)
 
 // 路由
 app.use('/api/blog', blogRouter);
