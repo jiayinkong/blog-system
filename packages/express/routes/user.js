@@ -7,28 +7,23 @@ router.post('/login', async (req, res, next) => {
   const { username, password } = req.body;
     const result = await login(username, password);
 
-    // 登录成功
-    if (result) {
-      // 用户信息存储在 session 中
-      const { username = '', realname = '' } = result;
-
-      console.log(req.session, 'req.session')
-      console.log(typeof req.session, 'typeof req.session')
-
-      req.session.username = username;
-      req.session.realname = realname;
-
-
-
+    if (!result) {
+      // 登录失败
       res.json(
-        new SuccessModel(result)
+        new ErrorModel('登录失败')
       )
       return;
     }
 
-    // 登录失败
+    // 登录成功
+    const { username: resUsername = '', realname: resRealname = '' } = result;
+
+    // 用户信息存储在 session 中
+    req.session.username = resUsername;
+    req.session.realname = resRealname;
+
     res.json(
-      new ErrorModel('登录失败')
+      new SuccessModel(result)
     )
 });
 
