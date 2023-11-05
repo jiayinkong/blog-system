@@ -1,16 +1,33 @@
+const path = require('path');
+const fs = require('fs');
 const createError = require('http-errors');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
 const RedisStore = require('connect-redis').default;
+const userRouter = require('./routes/user');
+const blogRouter = require('./routes/blog');
+const app = express();
+const ENV = process.env.NODE_ENV;
 
-let userRouter = require('./routes/user');
-let blogRouter = require('./routes/blog');
+// 处理日志
+// 开发、测试环境
+if(ENV !== 'production') {
+  app.use((logger('dev')));
 
-var app = express();
+// 线上环境
+} else {
+  // 写入流
+  const logFilename = path.join(__dirname, 'logs', 'access.log');
+  const writeStream = fs.createWriteStream(logFilename, {
+    flags: 'a',
+  });
+  app.use(logger('combined', { 
+    stream: writeStream
+  }))
+}
 
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

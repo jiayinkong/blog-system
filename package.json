@@ -7,7 +7,9 @@
     "debug:native": "cross-env NODE_ENV=development nodemon --inspect=9229 ./packages/native/bin/www.js",
     "dev:native": "cross-env NODE_ENV=development nodemon ./packages/native/bin/www.js",
     "prod:native": "cross-env NODE_ENV=production nodemon ./packages/native/bin/www.js",
-    "start:express": "node ./packages/express/bin/www"
+    "start:express": "node ./packages/express/bin/www",
+    "dev:express": "cross-env NODE_ENV=development nodemon --inspect=9220 ./packages/express/bin/www",
+    "prod:express": "cross-env NODE_ENV=production nodemon ./packages/express/bin/www"
   },
   "author": "",
   "license": "ISC",

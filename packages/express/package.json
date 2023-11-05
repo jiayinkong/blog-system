@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "cross-env NODE_ENV=development nodemon --inspect=9229 ./bin/www"
+    "dev": "cross-env NODE_ENV=development nodemon --inspect=9229 ./bin/www",
+    "prod": "cross-env NODE_ENV=production nodemon ./bin/www"
   },
   "dependencies": {
     "connect-redis": "^7.1.0",
