@@ -14,3 +14,4 @@ seq.authenticate().then(() => {
 seq.sync({ force: true }).then(() => {
   process.exit() // 退出进程
 })
+

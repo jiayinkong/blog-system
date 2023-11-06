@@ -18,6 +18,10 @@ const Blog = seq.define(
       type: Sequelize.STRING,
       allowNull: false,
     },
+    category: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    }
 
     // createAt updateAt - sequelize 会自动创建
   }

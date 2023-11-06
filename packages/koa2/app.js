@@ -16,6 +16,8 @@ const users = require('./routes/users')
 const blog = require('./routes/blog')
 const user = require('./routes/user')
 const { REDIS_CONF } = require('./conf/db')
+require('./db/sync'); // 同步数据模型到 mysql 数据库 
+
 const ENV = process.env.NODE_ENV
 
 // error handler
