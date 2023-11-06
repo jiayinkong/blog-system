@@ -11,6 +11,7 @@ if(env === 'development') {
     password: '123456',
     port: '3306',
     database: 'myblog',
+    databaseSeq: 'blog_sequlize',
   }
 
   REDIS_CONF = {
@@ -27,6 +28,7 @@ if(env === 'production') {
     password: '123456',
     port: '3306',
     database: 'myblog',
+    databaseSeq: 'blog_sequlize',
   }
 
   REDIS_CONF = {

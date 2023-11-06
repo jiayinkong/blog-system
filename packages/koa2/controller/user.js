@@ -1,20 +1,19 @@
-const { exec, escape } = require('../db/mysql');
+const User = require('../db/model/User');
 const { genPassword } = require('../utils/cryp');
 
 const login = async (username, password) => {
-  username = escape(username);
+  const user = await User.findOne({
+    where: {
+      username,
+      password: genPassword(password),
+    }
+  });
 
-  // 生成加密密码
-  password = genPassword(password);
+  if(!user) {
+    return null;
+  }
 
-  // 防止 sql 注入
-  password = escape(password);
-
-  const sql = `select username, realname from users where username = ${username} and password = ${password};`;
-
-  const result = await exec(sql);
-
-  return result[0];
+  return user.dataValues;
 };
 
 module.exports = {

@@ -1,70 +1,93 @@
 const xss = require('xss');
-const { exec, escape } = require('../db/mysql');
+const Sequelize = require('sequelize');
+const Blog = require('../db/model/Blog');
 
 // 获取博客列表
-const getList = (author, keyword) => {
-  
-  let sql = `select * from blogs where 1=1 `
-
+const getList = async (author = '', keyword = '') => {
+  const whereOpt = {};
   if(author) {
-    sql += `and author = ${escape(author)} `;
-  } 
-
-  if(keyword) {
-    sql += `and title like '%${keyword}%' `
+    whereOpt.author = author;
   }
+  if(keyword) {
+    whereOpt.title = {
+      [Sequelize.Op.like]: `%${keyword}%`
+    }
+  }
+  
+  const list = await Blog.findAll({
+    where: whereOpt,
+    order: [
+      ['id', 'desc']
+    ]
+  });
 
-  sql += `order by createTime desc;`;
-
-  // 返回 promise
-  return exec(sql);
+  return list.map(item => item.dataValues);
 }
 
 // 获取博客详情
 const getDetail = async (id) => {
-  let sql = `select * from blogs where id=${escape(id)};`;
-  const result = await exec(sql);
-  return result[0];
+  const blog = await Blog.findOne({
+    where: {
+      id,
+    }
+  });
+
+  if(!blog) {
+    return null;
+  }
+
+  return blog.dataValues;
 }
 
 // 新建博客
 const createBlog = async (blogData = {})=> {
-  const { title = '', content = '', author = '' } = blogData;
-  const createTime = Date.now();
+  const title = xss(blogData.title);
+  const content = xss(blogData.content);
+  const author = blogData.author; 
 
-  const escapeTitle = escape(xss(title));
-  const escapeContent = escape(xss(content));
-  const escapeAuthor = escape(author);
+  const blog = await Blog.create({
+    title,
+    content,
+    author,
+  });
 
-  const sql = `insert into blogs (title, content, createTime, author) values (${escapeTitle}, ${escapeContent}, ${createTime}, ${escapeAuthor});`
-  const insertData = await exec(sql);
+  if(!blog) {
+    return null;
+  }
 
   return {
-    id: insertData.insertId,
+    id: blog.dataValues.id,
   }
 }
 
 // 更新博客
 const updateBlog = async (id, blogData = {}) => {
-  const { title = '', content = '' } = blogData;
-  const escapeId = escape(id);
-  const escapeTitle = escape(xss(title));
-  const escapeContent = escape(xss(content));
+  const title = xss(blogData.title);
+  const content = xss(blogData.content);
 
-  const sql = `update blogs set title = ${escapeTitle}, content = ${escapeContent} where id=${escapeId}`;
+  const res = await Blog.update({
+    title,
+    content,
+  },
+  {
+    where: {
+      id,
+    }
+  });
 
-  const updateData = await exec(sql);
-  return !!(updateData.affectedRows > 0);
+  return res[0] >= 1;
 }
 
 // 删除博客
 const deleteBlog = async (id, author) => {
-  const escapeId = escape(id);
-  const escapeAuthor = escape(author);
+  const res = await Blog.destroy({
+    where: {
+      id,
+      author,
+    }
+  });
 
-  const sql = `delete from blogs where id=${escapeId} and author=${escapeAuthor};`;
-  const delData = await exec(sql);
-  return !!(delData.affectedRows > 0);
+  return res >= 1;
 }
  
 module.exports = {
